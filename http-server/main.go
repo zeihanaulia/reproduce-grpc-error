@@ -20,6 +20,16 @@ const (
 )
 
 func main() {
+	// Set up a connection to the server.
+	conn, err := grpc.Dial(address,
+		grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+			Backoff:           backoff.DefaultConfig,
+			MinConnectTimeout: 5 * time.Second,
+		}))
+	if err != nil {
+		log.Println(fmt.Errorf("did not connect: %v", err))
+	}
+
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
@@ -29,15 +39,7 @@ func main() {
 	})
 
 	r.Get("/connect", func(w http.ResponseWriter, r *http.Request) {
-		// Set up a connection to the server.
-		conn, err := grpc.Dial(address,
-			grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
-				Backoff:           backoff.DefaultConfig,
-				MinConnectTimeout: 5 * time.Second,
-			}))
-		if err != nil {
-			log.Println(fmt.Errorf("did not connect: %v", err))
-		}
+
 		// defer conn.Close()
 		c := pb.NewGreeterClient(conn)
 
