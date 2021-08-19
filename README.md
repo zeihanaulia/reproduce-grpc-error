@@ -31,6 +31,11 @@ docker tag rge-http-server zeihanaulia/rge-http-server:1.0.0
  -- delete service
 kubectl delete deployment rge-grpc-server
 kubectl delete deployment rge-http-server
+
+-- check
+kubectl get pods
+kubectl get service
+kubectl get deployments
 ```
 
 ## Hit service
@@ -38,3 +43,9 @@ kubectl delete deployment rge-http-server
 Using [hey](https://github.com/rakyll/hey) for hit concurrent request.
 
 hey -z 10m http://localhost:31533/connect
+
+## Learn
+
+Still, I cannot reproduce err `cannot assign requested address`.
+If I restart the grpc service, the http still reconnect after service up.
+and get error `could not greet: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 10.98.96.166:50051: connect: connection refused"`

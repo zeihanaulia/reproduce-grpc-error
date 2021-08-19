@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"runtime"
 	"syscall"
 	"time"
 
@@ -43,7 +44,10 @@ func main() {
 
 	r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
 		var a = []string{}
-		log.Fatalf(a[0])
+		i1 := a[0]
+
+		fmt.Println(i1)
+		runtime.Goexit()
 	})
 
 	r.Get("/connect", func(w http.ResponseWriter, r *http.Request) {
