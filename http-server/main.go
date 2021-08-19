@@ -5,6 +5,9 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
 	"time"
 
 	"github.com/go-chi/chi/v5"
@@ -22,7 +25,8 @@ const (
 func main() {
 	// Set up a connection to the server.
 	conn, err := grpc.Dial(address,
-		grpc.WithInsecure(), grpc.WithConnectParams(grpc.ConnectParams{
+		grpc.WithInsecure(),
+		grpc.WithConnectParams(grpc.ConnectParams{
 			Backoff:           backoff.DefaultConfig,
 			MinConnectTimeout: 5 * time.Second,
 		}))
@@ -32,13 +36,18 @@ func main() {
 
 	r := chi.NewRouter()
 	r.Use(middleware.Logger)
-	r.Use(middleware.Recoverer)
+	// r.Use(middleware.Recoverer)
+
+	r.Get("/health", healthHandler)
+	r.Get("/readiness", readinessHandler)
 
 	r.Get("/panic", func(w http.ResponseWriter, r *http.Request) {
-		panic("error")
+		var a = []string{}
+		log.Fatalf(a[0])
 	})
 
 	r.Get("/connect", func(w http.ResponseWriter, r *http.Request) {
+		time.Sleep(1 * time.Minute)
 
 		// defer conn.Close()
 		c := pb.NewGreeterClient(conn)
@@ -49,15 +58,45 @@ func main() {
 		name := "test"
 		resp, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 		if err != nil {
-			// log.Fatalf("could not greet: %v", err)
-			log.Println(fmt.Errorf("could not greet: %v", err))
+			log.Fatalf("could not greet: %v", err)
+			// log.Println(fmt.Errorf("could not greet: %v", err))
 		}
 		log.Printf("Greeting: %s", resp.GetMessage())
 
 	})
 
-	log.Printf("http server listening at %s", ":3000")
-	if err := http.ListenAndServe(":3001", r); err != nil {
-		panic(fmt.Errorf("cannot start server, err: %v", err))
-	}
+	server := &http.Server{Addr: "0.0.0.0:3001", Handler: r}
+
+	go func() {
+		log.Printf("http server listening at %s", ":3001")
+		if err := server.ListenAndServe(); err != nil {
+			panic(fmt.Errorf("cannot start server, err: %v", err))
+		}
+	}()
+
+	waitForShutdown(server)
+}
+
+func waitForShutdown(srv *http.Server) {
+	interruptChan := make(chan os.Signal, 1)
+	signal.Notify(interruptChan, os.Interrupt, syscall.SIGINT, syscall.SIGTERM)
+
+	// Block until we receive our signal.
+	<-interruptChan
+
+	// Create a deadline to wait for.
+	ctx, cancel := context.WithTimeout(context.Background(), time.Second*10)
+	defer cancel()
+	srv.Shutdown(ctx)
+
+	log.Println("Shutting down")
+	os.Exit(0)
+}
+
+func healthHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
+}
+
+func readinessHandler(w http.ResponseWriter, r *http.Request) {
+	w.WriteHeader(http.StatusOK)
 }

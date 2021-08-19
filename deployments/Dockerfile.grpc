@@ -1,0 +1,25 @@
+FROM namely/protoc-all:1.30_0 as proto_builder
+COPY . /app
+WORKDIR /app
+RUN mkdir test
+RUN ls
+RUN ls proto
+RUN pwd
+RUN protoc --version
+RUN protoc helloworld.proto --proto_path=proto/helloworld/ --go_out=plugins=grpc:proto
+
+FROM golang:1.17-alpine  as builder
+RUN apk add --update gcc openssh git bash libc-dev ca-certificates make g++
+
+ENV BUILDDIR /app
+COPY --from=proto_builder $BUILDDIR /app
+COPY . /app
+WORKDIR /app
+RUN CGO_ENABLED=0 GOOS=linux go build -a -installsuffix cgo -o main /app/grpc-server/main.go
+
+FROM alpine:latest  
+RUN apk --no-cache add ca-certificates
+WORKDIR /app
+COPY --from=builder /app/main .
+EXPOSE 50051
+CMD ["./main"] 

@@ -1,0 +1,20 @@
+apiVersion: apps/v1
+kind: Deployment               
+metadata:
+  name: rge-grpc-server     
+spec:
+  replicas: 3               
+  selector:
+    matchLabels:
+      app: rge-grpc-server        
+  template:                      
+    metadata:
+      labels:                    
+        app: rge-grpc-server 
+    spec:                        
+      containers:
+      - name: rge-grpc-server
+        image: zeihanaulia/rge-grpc-server:1.0.0 
+        imagePullPolicy: IfNotPresent
+        ports:
+          - containerPort: 50051     
