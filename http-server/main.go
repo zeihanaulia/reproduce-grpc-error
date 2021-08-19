@@ -18,7 +18,7 @@ import (
 )
 
 const (
-	address     = "localhost:50051"
+	address     = "10.98.96.166:50051"
 	defaultName = "world"
 )
 
@@ -47,8 +47,6 @@ func main() {
 	})
 
 	r.Get("/connect", func(w http.ResponseWriter, r *http.Request) {
-		time.Sleep(1 * time.Minute)
-
 		// defer conn.Close()
 		c := pb.NewGreeterClient(conn)
 
@@ -58,11 +56,10 @@ func main() {
 		name := "test"
 		resp, err := c.SayHello(ctx, &pb.HelloRequest{Name: name})
 		if err != nil {
-			log.Fatalf("could not greet: %v", err)
-			// log.Println(fmt.Errorf("could not greet: %v", err))
+			// log.Fatalf("could not greet: %v", err)
+			log.Println(fmt.Errorf("could not greet: %v", err))
 		}
 		log.Printf("Greeting: %s", resp.GetMessage())
-
 	})
 
 	server := &http.Server{Addr: "0.0.0.0:3001", Handler: r}
