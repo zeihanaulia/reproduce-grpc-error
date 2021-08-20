@@ -1,5 +1,9 @@
 # reproduce-grpc-error
 
+Running on local
+
+- Install Kubernetes with minikube / enable kubernetes on docker dekstop
+
 ## Build grpc server
 
 ```
