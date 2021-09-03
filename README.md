@@ -16,6 +16,9 @@ docker tag rge-grpc-server zeihanaulia/rge-grpc-server:1.0.0
 ```
 docker build -t rge-http-server -f ./deployments/Dockerfile.http .
 docker tag rge-http-server zeihanaulia/rge-http-server:1.0.0
+
+docker build -t rge-http-server-2 -f ./deployments/Dockerfile.http2 .
+docker tag rge-http-server-2 zeihanaulia/rge-http-server-2:1.0.0
 ```
 
 ## Deploy service
