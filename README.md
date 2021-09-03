@@ -49,10 +49,12 @@ kubectl get deployments
 
 Using [hey](https://github.com/rakyll/hey) for hit concurrent request.
 
-hey -z 10m http://localhost:31533/connect
+hey -z 5m http://localhost:31533/connect
 
 ## Learn
 
 Still, I cannot reproduce err `cannot assign requested address`.
 If I restart the grpc service, the http still reconnect after service up.
 and get error `could not greet: rpc error: code = Unavailable desc = connection error: desc = "transport: Error while dialing dial tcp 10.98.96.166:50051: connect: connection refused"`
+
+New Approach, add 2 container and in single pod. then kill second container for restarting. But issue still cannot reproduce.

@@ -1,4 +1,3 @@
-
 FROM golang:latest as builder
 COPY . /app
 WORKDIR /app

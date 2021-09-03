@@ -40,7 +40,7 @@ spec:
           initialDelaySeconds: 5
           timeoutSeconds: 1    
       - name: rge-http-server-2
-        image: zeihanaulia/rge-http-server:1.0.0
+        image: zeihanaulia/rge-http-server-2:1.0.0
         resources:
           limits:
             memory: 512Mi
